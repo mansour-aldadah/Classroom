@@ -17,10 +17,26 @@ class ApplyUserPreferences
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $supported = ['en', 'ar'];
+        $header = $request->header('accept-language');
+        $locales = explode(',', $header);
+        if ($locales) {
+            foreach ($locales as $locale) {
+                if (($i = strpos($locale, ';')) !== false) {
+                    $locale = substr($locale, 0, $i);
+                }
+                if (in_array($locale, $supported)) {
+                    break;
+                }
+            }
+        }
+
         $user = Auth::user();
         if ($user) {
-            App::setLocale($user->profile->locale ?? config('app.locale'));
+            $locale = $user->profile->locale ?? $locale;
         }
+        App::setLocale($locale);
+
         return $next($request);
     }
 }

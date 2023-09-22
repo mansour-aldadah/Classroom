@@ -1,4 +1,8 @@
-@props(['value' => '', 'name'])
+@props([
+    'value' => '',
+    'name',
+    'id' => null,
+])
 
 
 <textarea name="{{ $name }}"

@@ -65,3 +65,16 @@
         </x-form.floating-control>
     </div>
 </div>
+
+@push('style')
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+@endpush
+@push('scripts')
+    <script src="https://cdn.tiny.cloud/1/cdexc5550nj4jyyd76ey4aom8awzpbvhgcxfnca14b7ypsp3/tinymce/6/tinymce.min.js"
+        referrerpolicy="origin"></script>
+    <script>
+        $(document).ready(function() {
+            $('#description').summernote();
+        });
+    </script>
+@endpush

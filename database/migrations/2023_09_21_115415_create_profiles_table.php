@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('last_name');
             $table->enum('gender', ['male', 'female'])->nullable();
             $table->date('birthday')->nullable();
-            $table->char('local', 2)->default('en');
+            $table->char('locale', 2)->default('en');
             $table->string('timezone')->default('UTC');
             $table->timestamps();
         });

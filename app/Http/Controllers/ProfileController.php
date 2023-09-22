@@ -36,6 +36,13 @@ class ProfileController extends Controller
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
+    public function updateLang(Request $request, $lang)
+    {
+        $user = Auth::user();
+        $user->profile->locale = $lang;
+        $user->profile->save();
+        return back();
+    }
 
     /**
      * Delete the user's account.
