@@ -53,7 +53,7 @@
                     <div id="flush-collapse{{ $cwt->id }}" class="accordion-collapse collapse"
                         data-bs-parent="#accordionFlushExample">
                         <div class="accordion-body">
-                            {{ $cwt->description }}
+                            {!! $cwt->description !!}
                             <div>
                                 <a class="btn btn-sm btn-outline-success "
                                     href="{{ route('classrooms.classworks.show', [$cwt->classroom_id, $cwt->id]) }}">View</a>
@@ -93,7 +93,7 @@
                             <div id="flush-collapse{{ $classwork->id }}" class="accordion-collapse collapse"
                                 data-bs-parent="#accordionFlushExample">
                                 <div class="accordion-body">
-                                    {{ $classwork->description }}
+                                    {!! $classwork->description !!}
                                     <div>
                                         <a class="btn btn-sm btn-outline-success "
                                             href="{{ route('classrooms.classworks.show', [$classwork->classroom_id, $classwork->id]) }}">View</a>
@@ -168,3 +168,57 @@
         </form>
     </div>
 </div>
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var ttttLink = document.getElementById('tttt');
+            var customModal = document.getElementById('custom-modal');
+            var userInputField = document.getElementById('user-input');
+            var modalSave = document.getElementById('modal-save');
+            var modalClose = document.getElementById('modal-close');
+
+            var ttLink = document.getElementById('tt');
+            var customModal2 = document.getElementById('custom-modal2');
+            var userInputField2 = document.getElementById('user-input2');
+            var modalSave2 = document.getElementById('modal-save2');
+            var modalClose2 = document.getElementById('modal-close2');
+
+            ttttLink.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent the default link behavior
+                userInputField.value = ''; // Clear previous input
+                customModal.style.display = 'flex';
+            });
+
+            modalClose.addEventListener('click', function() {
+                customModal.style.display = 'none';
+            });
+
+            userInputField.addEventListener('keydown', function(event) {
+                event.stopPropagation(); // Prevent closing the modal on Enter key
+            });
+
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('reject-button')) {
+                    e.preventDefault(); // Prevent the default link behavior
+                    let topicId = e.target.getAttribute('data-topic-id');
+                    let classroomId = document.querySelector('.ccc').getAttribute('data-classroom-id');
+                    userInputField2.value = ''; // Clear previous input
+                    customModal2.style.display = 'flex';
+                    // Use the topicId variable to update the form action URL
+                    var form = customModal2.querySelector('form');
+                    form.action = "/classrooms/" + classroomId + "/topics/" +
+                        topicId; // Update the action URL
+                }
+            });
+
+            modalClose2.addEventListener('click', function() {
+                customModal2.style.display = 'none';
+            });
+
+            userInputField2.addEventListener('keydown', function(event) {
+                event.stopPropagation(); // Prevent closing the modal on Enter key
+            });
+        });
+    </script>
+@endpush

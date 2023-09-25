@@ -8,9 +8,7 @@
         <div class="row">
             <div class="col-md-8">
                 <div>
-                    <p>
-                        {{ $classwork->description }}
-                    </p>
+                    {!! $classwork->description !!}
                 </div>
                 <h4>Comments</h4>
                 <form action="{{ route('comments.store') }}" method="POST">

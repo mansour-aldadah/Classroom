@@ -62,6 +62,11 @@ class Classwork extends Model
     {
         return $this->belongsTo(Topic::class, 'topic_id', 'id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
     public function users()
     {
         return $this->belongsToMany(User::class)

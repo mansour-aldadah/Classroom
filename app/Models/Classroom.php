@@ -81,8 +81,10 @@ class Classroom extends Model
     {
         return $this->users()->wherePivot('role', 'student');
     }
-
-
+    public function streams()
+    {
+        return $this->hasMany(Stream::class)->latest();
+    }
     public function scopeFilter(Builder $builder, $filters)
     {
         $builder->when($filters['search'] ?? '', function ($builder, $value) {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ClassworkCreated;
 use App\Models\Classroom;
 use App\Models\Classwork;
 use Illuminate\Database\QueryException;
@@ -18,14 +19,19 @@ class ClassworkController extends Controller
 
     protected function getType(Request $request)
     {
-        $type = $request->query('type');
-        $allowed_type = [
-            Classwork::TYPE_ASSIGNMENT, Classwork::TYPE_MATERIAL, Classwork::TYPE_QUESTION
-        ];
-        if (!in_array($type, $allowed_type)) {
-            $type = Classwork::TYPE_ASSIGNMENT;
+        try {
+            $type = $request->query('type');
+
+            $allowed_type = [
+                Classwork::TYPE_ASSIGNMENT, Classwork::TYPE_MATERIAL, Classwork::TYPE_QUESTION
+            ];
+            if (!in_array($type, $allowed_type)) {
+                $type = Classwork::TYPE_ASSIGNMENT;
+            }
+            return $type;
+        } catch (\Exception $e) {
+            return Classwork::TYPE_ASSIGNMENT;
         }
-        return $type;
     }
 
     /**
@@ -36,16 +42,43 @@ class ClassworkController extends Controller
         $this->authorize('viewAny', [Classwork::class, $classroom]);
         $classworksWithoutTopic = $classroom->classworks()
             ->where('topic_id', null)
+            // ->where(function ($query) {
+            //     $query->whereRaw('EXISTS (SELECT 1 FROM classwork_user
+            //     WHERE classwork_user.classwork_id = classworks.id
+            //     AND classwork_user.user_id = ?)', [Auth::id()]);
+
+            //     $query->orWhereRaw('EXISTS (SELECT 1 FROM classroom_user
+            //     WHERE classroom_user.classroom_id = classworks.classroom_id
+            //     AND classroom_user.user_id = ?
+            //     AND classroom_user.role = ?)', [Auth::id(), 'teacher']);
+            // })
             ->latest('published_at')
             ->filter($request->query())
+            ->where(function ($query) {
+                $query->WhereHas('users', function ($query) {
+                    $query->where('id', '=', Auth::id());
+                })
+                    ->orWhereHas('classroom.teachers', function ($query) {
+                        $query->where('id', '=', Auth::id());
+                    });
+            })
             ->get();
 
         $topics = $classroom->topics()->with(['classworks' => function ($query2) use ($request) {
-            $query2->where(function ($subquery) use ($request) {
+            $query2->where(function ($query) {
+                $query->WhereHas('users', function ($query) {
+                    $query->where('id', '=', Auth::id());
+                })
+                    ->orWhereHas('classroom.teachers', function ($query) {
+                        $query->where('id', '=', Auth::id());
+                    });
+            })->where(function ($subquery) use ($request) {
                 $subquery->where('title', 'LIKE', "%{$request->search}%")
                     ->orWhere('description', 'LIKE', "%{$request->search}%");
             });
         }])->filter($request->query())->get();
+
+
 
         return view('classworks.index', [
             'classroom' => $classroom,
@@ -93,11 +126,13 @@ class ClassworkController extends Controller
             // 'classroom_id' => $classroom->id,
         ]);
         try {
-            DB::transaction(function () use ($classroom, $request, $type) {
+            DB::transaction(function () use ($classroom, $request) {
 
                 $classwork = $classroom->classworks()->create($request->all());
                 // Classwork::create($request->all());
                 $classwork->users()->attach($request->input('students'));
+                event(new ClassworkCreated($classwork));
+                // ClassworkCreated::dispatch($classwork);
             });
         } catch (QueryException $e) {
             return back()->with('error', $e->getMessage());
